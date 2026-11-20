@@ -29,30 +29,30 @@ export function BottomSheetModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/50 backdrop-blur-[2px]"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-[2px]"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
       onClick={onClose}
     >
       <div
-        className="w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-2xl shadow-xl border border-slate-200 max-h-[90vh] flex flex-col overflow-hidden"
+        className="w-full sm:max-w-lg bg-[#111C28] text-slate-100 rounded-t-3xl sm:rounded-2xl shadow-2xl border border-slate-800 max-h-[90vh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drag handle visible on mobile */}
         <div className="sm:hidden pt-3 pb-1 flex justify-center shrink-0">
-          <div className="w-10 h-1.5 bg-slate-300 rounded-full" />
+          <div className="w-10 h-1.5 bg-slate-700 rounded-full" />
         </div>
 
-        <div className="flex items-center justify-between gap-3 px-5 py-3.5 border-b border-slate-200 shrink-0">
-          <h2 id="modal-title" className="text-lg font-semibold text-slate-900 truncate">
+        <div className="flex items-center justify-between gap-3 px-5 py-3.5 border-b border-slate-800 shrink-0">
+          <h2 id="modal-title" className="text-lg font-semibold text-slate-50 truncate">
             {title}
           </h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Cerrar ventana"
-            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors focus-visible:outline-2 focus-visible:outline-blue-700"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors focus-visible:outline-2 focus-visible:outline-teal-400"
           >
             <X className="w-5 h-5" />
           </button>

@@ -38,6 +38,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -61,9 +63,9 @@ import java.util.Locale
 
 // Niveles de prioridad disponibles para cada actividad
 enum class Prioridad(val etiqueta: String, val colorTexto: Color) {
-    BAJA("Baja", Color(0xFF047857)),
-    MEDIA("Media", Color(0xFFB45309)),
-    ALTA("Alta", Color(0xFFB91C1C))
+    BAJA("Baja", Color(0xFF5EEAD4)),
+    MEDIA("Media", Color(0xFFFCD34D)),
+    ALTA("Alta", Color(0xFFFB7185))
 }
 
 // Modelo simple para cada actividad en memoria
@@ -80,11 +82,27 @@ fun obtenerFechaDeHoy(): String {
     return formato.format(Date())
 }
 
+// Paleta moderna con fondo oscuro Midnight-Teal (no blanco)
+private val PaletaMiAgenda = darkColorScheme(
+    primary = Color(0xFF2DD4BF),
+    onPrimary = Color(0xFF042F2E),
+    primaryContainer = Color(0xFF0F766E),
+    onPrimaryContainer = Color.White,
+    secondary = Color(0xFF34D399),
+    onSecondary = Color(0xFF022C22),
+    background = Color(0xFF0D1E26),
+    onBackground = Color(0xFFF1F5F9),
+    surface = Color(0xFF132230),
+    onSurface = Color(0xFFF1F5F9),
+    surfaceVariant = Color(0xFF192B3C),
+    onSurfaceVariant = Color(0xFF94A3B8)
+)
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MaterialTheme {
+            MaterialTheme(colorScheme = PaletaMiAgenda) {
                 MiAgendaPantalla()
             }
         }
@@ -129,9 +147,14 @@ fun MiAgendaPantalla() {
     var mostrarErrorEdicion by remember { mutableStateOf(false) }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text(text = "Mi Agenda") }
+                title = { Text(text = "Mi Agenda") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             )
         }
     ) { paddingInterno ->
@@ -220,7 +243,7 @@ fun MiAgendaPantalla() {
                             onClick = { prioridadSeleccionada = nivel },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = nivel.colorTexto,
-                                contentColor = Color.White
+                                contentColor = Color(0xFF042F2E)
                             ),
                             modifier = Modifier
                                 .weight(1f)
@@ -365,7 +388,7 @@ fun MiAgendaPantalla() {
                             onClick = { filtroPrioridad = prioridadObjetivo },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = colorActivo,
-                                contentColor = Color.White
+                                contentColor = Color(0xFF042F2E)
                             ),
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
                             modifier = Modifier
