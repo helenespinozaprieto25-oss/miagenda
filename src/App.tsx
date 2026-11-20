@@ -3,6 +3,7 @@ import { AlertCircle, CalendarDays, Check, Flag, Pencil, Plus, Search, Trash2, X
 import { BottomSheetModal } from './components/BottomSheetModal';
 
 type PriorityLevel = 'Baja' | 'Media' | 'Alta';
+type PriorityFilter = 'Todas' | 'Alta' | 'Media' | 'Baja';
 
 interface ActivityItem {
   id: number;
@@ -13,6 +14,7 @@ interface ActivityItem {
 }
 
 const PRIORITY_OPTIONS: PriorityLevel[] = ['Baja', 'Media', 'Alta'];
+const PRIORITY_FILTERS: PriorityFilter[] = ['Todas', 'Alta', 'Media', 'Baja'];
 
 const SHORT_MONTHS_ES = [
   'ene',
@@ -92,8 +94,9 @@ export default function App() {
   const [activities, setActivities] = useState<ActivityItem[]>(createInitialActivities);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Estado para búsqueda en tiempo real
+  // Estado para búsqueda en tiempo real y filtro por prioridad
   const [searchQuery, setSearchQuery] = useState('');
+  const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>('Todas');
 
   // Estado para edición de una actividad existente
   const [editingActivity, setEditingActivity] = useState<ActivityItem | null>(null);
@@ -190,9 +193,12 @@ export default function App() {
   const completionPercentage =
     activities.length > 0 ? Math.round((completedCount / activities.length) * 100) : 0;
   const normalizedSearch = searchQuery.trim().toLowerCase();
-  const filteredActivities = normalizedSearch
-    ? activities.filter((a) => a.text.toLowerCase().includes(normalizedSearch))
-    : activities;
+  const isFiltered = Boolean(normalizedSearch) || priorityFilter !== 'Todas';
+  const filteredActivities = activities.filter((a) => {
+    const matchesSearch = !normalizedSearch || a.text.toLowerCase().includes(normalizedSearch);
+    const matchesPriority = priorityFilter === 'Todas' || a.priority === priorityFilter;
+    return matchesSearch && matchesPriority;
+  });
 
   return (
     <div className="min-h-screen bg-slate-50 sm:bg-slate-200/70 text-slate-900 flex flex-col sm:items-center sm:justify-center sm:p-2">
@@ -358,14 +364,14 @@ export default function App() {
               Lista de actividades
             </h2>
             <span className="text-xs font-medium text-slate-500 tabular-nums">
-              {normalizedSearch
+              {isFiltered
                 ? `${filteredActivities.length} de ${activities.length}`
                 : `${activities.length} ${activities.length === 1 ? 'actividad' : 'actividades'}`}
             </span>
           </div>
 
           {/* Barra de búsqueda en tiempo real */}
-          <div className="relative mb-3.5">
+          <div className="relative mb-3">
             <Search
               aria-hidden="true"
               className="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
@@ -393,6 +399,42 @@ export default function App() {
             )}
           </div>
 
+          {/* Selector de filtro por prioridad */}
+          <div
+            className="grid grid-cols-4 gap-1 p-1 bg-slate-200/70 rounded-xl mb-3.5"
+            role="tablist"
+            aria-label="Filtrar actividades por prioridad"
+          >
+            {PRIORITY_FILTERS.map((filterOption) => {
+              const isSelected = priorityFilter === filterOption;
+              const activeColor =
+                filterOption === 'Alta'
+                  ? 'bg-white text-red-700 shadow-sm'
+                  : filterOption === 'Media'
+                  ? 'bg-white text-amber-800 shadow-sm'
+                  : filterOption === 'Baja'
+                  ? 'bg-white text-emerald-700 shadow-sm'
+                  : 'bg-white text-blue-700 shadow-sm';
+
+              return (
+                <button
+                  key={filterOption}
+                  type="button"
+                  role="tab"
+                  aria-selected={isSelected}
+                  onClick={() => setPriorityFilter(filterOption)}
+                  className={`min-h-[44px] px-2 py-2 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap ${
+                    isSelected
+                      ? activeColor
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  {filterOption}
+                </button>
+              );
+            })}
+          </div>
+
           {activities.length === 0 ? (
             <div className="flex-1 flex items-center justify-center text-center py-12 px-4 bg-white rounded-2xl border border-slate-200">
               <p className="text-base text-slate-600 leading-relaxed">
@@ -402,11 +444,14 @@ export default function App() {
           ) : filteredActivities.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center py-10 px-4 bg-white rounded-2xl border border-slate-200 space-y-3">
               <p className="text-base text-slate-600 leading-relaxed">
-                No se encontraron actividades que coincidan con “{searchQuery.trim()}”.
+                No hay actividades que coincidan con el filtro aplicado.
               </p>
               <button
                 type="button"
-                onClick={() => setSearchQuery('')}
+                onClick={() => {
+                  setSearchQuery('');
+                  setPriorityFilter('Todas');
+                }}
                 className="min-h-[44px] px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-sm font-semibold transition-colors"
               >
                 Mostrar todas

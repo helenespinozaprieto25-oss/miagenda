@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -98,18 +99,18 @@ fun MiAgendaPantalla() {
     // Estado en memoria: se conserva solo mientras la aplicación está abierta
     var textoActividad by remember { mutableStateOf("") }
     var textoBusqueda by remember { mutableStateOf("") }
+    var filtroPrioridad by remember { mutableStateOf<Prioridad?>(null) }
     var fechaSeleccionada by remember { mutableStateOf("") }
     var prioridadSeleccionada by remember { mutableStateOf(Prioridad.MEDIA) }
     var mostrarError by remember { mutableStateOf(false) }
     var siguienteId by remember { mutableIntStateOf(1) }
     val actividades = remember { mutableStateListOf<Actividad>() }
 
-    val actividadesFiltradas = if (textoBusqueda.isBlank()) {
-        actividades
-    } else {
-        actividades.filter {
-            it.texto.contains(textoBusqueda.trim(), ignoreCase = true)
-        }
+    val actividadesFiltradas = actividades.filter { actividad ->
+        val coincideTexto = textoBusqueda.isBlank() ||
+            actividad.texto.contains(textoBusqueda.trim(), ignoreCase = true)
+        val coincidePrioridad = filtroPrioridad == null || actividad.prioridad == filtroPrioridad
+        coincideTexto && coincidePrioridad
     }
 
     val totalActividades = actividades.size
@@ -343,6 +344,56 @@ fun MiAgendaPantalla() {
                 modifier = Modifier.fillMaxWidth()
             )
 
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Selector de filtros por prioridad (Todas, Alta, Media, Baja)
+            val opcionesFiltro: List<Pair<String, Prioridad?>> = listOf(
+                "Todas" to null,
+                "Alta" to Prioridad.ALTA,
+                "Media" to Prioridad.MEDIA,
+                "Baja" to Prioridad.BAJA
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                opcionesFiltro.forEach { (etiqueta, prioridadObjetivo) ->
+                    val seleccionado = filtroPrioridad == prioridadObjetivo
+                    val colorActivo = prioridadObjetivo?.colorTexto ?: MaterialTheme.colorScheme.primary
+                    if (seleccionado) {
+                        Button(
+                            onClick = { filtroPrioridad = prioridadObjetivo },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = colorActivo,
+                                contentColor = Color.White
+                            ),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(40.dp)
+                        ) {
+                            Text(
+                                text = etiqueta,
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
+                    } else {
+                        OutlinedButton(
+                            onClick = { filtroPrioridad = prioridadObjetivo },
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(40.dp)
+                        ) {
+                            Text(
+                                text = etiqueta,
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(12.dp))
 
             // Lista de actividades agregadas
@@ -354,7 +405,7 @@ fun MiAgendaPantalla() {
                 )
             } else if (actividadesFiltradas.isEmpty()) {
                 Text(
-                    text = "No se encontraron actividades que coincidan con la búsqueda.",
+                    text = "No se encontraron actividades que coincidan con el filtro.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
